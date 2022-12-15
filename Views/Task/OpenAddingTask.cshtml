@@ -1,0 +1,73 @@
+﻿@model Aplikacja_ASP_MVC.Infrastructure.ViewModel.TaskViewModel
+<h3> Dodawanie zadań </h3>
+<div class="container">
+
+	@using (Html.BeginForm("SaveTask", "Task"))
+	{
+
+		@Html.ValidationSummary(true)
+		<div class="form-group">
+			@Html.Label("Tytuł","Tytuł", new { @class = "control-label"})
+			@Html.TextBoxFor(model => model.Title, new { @class = "form-control"})
+			@Html.ValidationMessageFor(model => model.Title, "")
+		</div>
+		<br />
+		<div class="form-group">
+			@Html.Label("Opis", "Opis", new { @class = "control-label"})
+			@Html.TextBoxFor(model => model.Description, new { @class = "form-control"})
+			@Html.ValidationMessageFor(model => model.Description, "")
+		</div>
+		<br />
+		<div class="form-group">
+			@Html.Label("Termin wykonania", "Termin wykonania", new { @class = "control-label"})
+			@Html.EditorFor(model => model.Deadline, new { htmlAttributes = new
+		{
+		Value =  Model.Deadline.ToString("dd-MM-yyyy"),
+		@class= "form-control"
+		}})
+			@Html.ValidationMessageFor(model => model.Deadline, "")
+		</div>
+		<br />
+
+		<div class="mb-3">
+			@Html.Label("Pracownik","Pracownik", new {@class= "form -label"})
+
+			<select class="form-select" asp-items="Model.EmployeesSelectList" asp-for="SelectedEmployee">
+			</select>
+		</div>
+		<div class="form-group">
+			@Html.Label("Status")
+
+
+			<select name="status">
+				@foreach (var status in Model.Status)
+				{
+					<option value="@status"> @status </option>
+				}
+
+			</select>
+		</div>
+		<br />
+		<input class="btn btn-secondary" type="submit" value="Dodaj zadanie" />
+
+	}
+
+</div>
+@section Scripts
+	{
+	<link href="~/css/jquery-ui-themes-1.13.2/jquery-ui.css" rel="stylesheet" />
+	<link href="~/css/jquery-ui-1.13.2/jquery-ui.css" rel="stylesheet" />
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.3/jquery.validate.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/3.2.12/jquery.validate.unobtrusive.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/jquery-ui.min.js"></script>	
+	<script type="text/javascript">
+		$(document).ready(function () {
+			$('.datepicker').datepicker({
+				changeMonth: true,
+				changeYear: true,
+			});
+		});
+
+	</script>
+    }

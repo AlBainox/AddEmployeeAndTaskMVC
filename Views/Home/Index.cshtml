@@ -1,0 +1,192 @@
+﻿@model Aplikacja_ASP_MVC.Infrastructure.ViewModel.EmployeesListViewModel
+
+<button class="btn btn-secondary" type="submit" onclick="location.href='@Url.Action("OpenAddingEmployee", "Employee")'"> Dodaj pracownika </button>
+<button class="btn btn-secondary" type="submit" onclick="location.href='@Url.Action("OpenAddingTask", "Task")'"> Dodaj zadanie </button>
+
+<h3> Lista pracowników:  </h3>
+
+<div class="container shadow min-vh-100 py-2">
+	<div class="table-responsive">
+		<table class="table accordion">
+			<thead>
+				<tr>
+					<th scope="col">Imię</th>
+					<th scope="col">Nazwisko</th>
+					<th scope="col">Email</th>
+					<th scope="col">Stanowisko</th>
+				</tr>
+			</thead>
+
+			<tbody>
+				@foreach (var employee in Model.EmployeesList)
+				{
+
+					<tr data-toggle="collapse" data-target="#AA_@(employee.ID.ToString())" class="@string.Format("toRemove{0}", employee.ID)">
+						<td width="20%" colspan="1">@employee.Name</td>
+						<td width="20%" colspan="1">@employee.Surname</td>
+						<td width="20%" colspan="1">@employee.Email</td>
+						<td width="20%" colspan="1">@employee.Position.FirstOrDefault()</td>
+						<td width="20%" colspan="2"><input class="@string.Format("btn btn-secondary btnRemove{0}", employee.ID)" value="Usuń pracownika" type="submit"></td>
+					</tr>
+					<tr class="@string.Format("collapse accordion-collapse toRemove{0}", employee.ID)" id="AA_@(employee.ID.ToString())" data-parent=".table" data-toggle="collapse">
+
+						<th width="16%" scope="col">Tytuł</th>
+						<th width="16%" scope="col">Opis</th>
+						<th width="16%" scope="col">Status</th>
+						<th width="16%" scope="col">Termin wykonania</th>
+						<th width="16%" scope="col"></th>
+						<th width="16%" scope="col"></th>
+
+					</tr>
+
+					@foreach (var task in employee.Tasks)
+					{
+						<tr class="@string.Format("collapse accordion-collapse toRemove{0}", employee.ID)" id="AA_@(employee.ID.ToString())" data-parent=".table" data-toggle="collapse">
+
+							<td width="16%" scope="col" colspan="1"> @task.Title</td>
+							<td width="16%" scope="col" colspan="1"> @task.Description</td>
+							<td width="16%" class="@string.Format("statElem{0}", task.ID.ToString())" scope="col" colspan="1"></td>
+							<td width="16%" scope="col" colspan="1"> @task.Deadline </td>
+							<td width="16%" class="text-center" scope="col" colspan="1">
+								<button class="@string.Format("btn btn-secondary elem1{0}", task.ID.ToString())"></button>
+							</td>
+							<td width="16%" class="text-center" scope="col" colspan="1">
+								<button class="@string.Format("btn btn-secondary elem2{0}", task.ID.ToString())"></button>
+							</td>
+
+						</tr>
+
+					}
+
+				}
+			</tbody>
+
+		</table>
+	</div>
+</div>
+
+
+@section Scripts{
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-ajax-unobtrusive/3.2.6/jquery.unobtrusive-ajax.min.js"></script>
+	<script>
+
+		var isCancel = false;
+
+		var firstElement;
+		var secondElement;
+		var firstBtn;
+		var secondBtn;
+		var btnToAdd;
+		var statusElement;
+		var newStatus;
+
+		const listingStatuses = function (status, taskId) {
+			switch (status) {
+				case 'NEW':
+					document.querySelector(`.elem1${taskId}`).textContent = 'IN PROGRESS';
+					document.querySelector(`.elem2${taskId}`).textContent = 'CANCELED';
+					break;
+				case 'IN PROGRESS':
+					document.querySelector(`.elem1${taskId}`).textContent = 'TO SPECIFY';
+					document.querySelector(`.elem2${taskId}`).textContent = 'TO TEST';
+					break;
+				case 'REOPENED':
+					if (isCancel) {
+						document.querySelector(`.elem2${taskId}`).style.visibility = 'visible'
+						isCancel = false;
+					}
+					document.querySelector(`.elem1${taskId}`).textContent = 'IN PROGRESS';
+					document.querySelector(`.elem2${taskId}`).textContent = 'CANCELED';
+					break;
+				case 'TO TEST':
+					document.querySelector(`.elem1${taskId}`).textContent = 'REOPENED';
+					document.querySelector(`.elem2${taskId}`).textContent = 'COMPLETED';
+					break;
+				case 'TO SPECIFY':
+					document.querySelector(`.elem1${taskId}`).textContent = 'REOPENED';
+					document.querySelector(`.elem2${taskId}`).textContent = 'COMPLETED';
+					break;
+				case 'COMPLETED':
+					document.querySelector(`.elem1${taskId}`).textContent = 'REOPENED';
+					document.querySelector(`.elem2${taskId}`).textContent = 'CANCELED';
+					break;
+				case 'CANCELED':
+					document.querySelector(`.elem1${taskId}`).textContent = 'REOPENED';
+					isCancel = true;
+					document.querySelector(`.elem2${taskId}`).style.visibility = 'hidden';
+					break;
+				default:
+			}
+		}
+		const passStatusToController = function (taskId, newStatus) {
+			$.ajax({
+				url: "/Task/SaveStatus",
+				type: "POST",
+				data: { taskId: taskId, status: newStatus },
+			});
+		}
+
+		const updateBtn = function () {
+
+		@foreach (var employee in Model.EmployeesList)
+		{
+			@:document.querySelector("@string.Format(".btnRemove{0}", employee.ID)").addEventListener("click", () => {
+			@:$.ajax({
+			@:url: "/Employee/RemoveEmployee",
+			@:type: "POST",
+			@:data: { id: @employee.ID },
+			@:success: function () {
+			@:document.querySelector("@string.Format(".toRemove{0}", employee.ID)").remove();			
+			@:}
+			@:})
+			@:});
+			
+
+
+			@foreach (var task in employee.Tasks)
+			{
+
+				@:document.querySelector("@string.Format(".statElem{0}", task.ID)").innerHTML = "@task.Status.FirstOrDefault()";
+
+				@:listingStatuses("@task.Status.FirstOrDefault()", "@task.ID.ToString()");
+
+
+				@:document.querySelector("@string.Format(".elem1{0}", task.ID.ToString())").addEventListener("click", () => {
+
+				@:newStatus = document.querySelector("@string.Format(".elem1{0}", task.ID.ToString())").textContent;
+
+				@:passStatusToController("@task.ID.ToString()", newStatus);
+
+				@:document.querySelector("@string.Format(".statElem{0}", task.ID)").textContent= newStatus;
+
+				@:listingStatuses(newStatus, "@task.ID.ToString()");
+				@:});
+
+
+				@:document.querySelector("@string.Format(".elem2{0}", task.ID.ToString())").addEventListener("click", () => {
+
+				@:newStatus = document.querySelector("@string.Format(".elem2{0}", task.ID.ToString())").textContent;
+
+				@:passStatusToController("@task.ID.ToString()", newStatus);
+
+				@:document.querySelector("@string.Format(".statElem{0}", task.ID)").textContent= newStatus;
+
+				@:listingStatuses(newStatus, "@task.ID.ToString()");
+				@:});
+
+
+
+
+			}
+		}
+		};
+
+		updateBtn();
+
+
+
+
+
+
+	</script>
+		}

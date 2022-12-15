@@ -1,0 +1,51 @@
+﻿@model Aplikacja_ASP_MVC.Infrastructure.ViewModel.EmployeeViewModel
+
+<h3> Dodawanie pracownika </h3>
+<br />
+<div class="container">
+	@using (Html.BeginForm("SaveEmployee", "Employee"))
+	{
+
+		@Html.ValidationSummary(true)
+		<div class="form-group">
+			@Html.Label("Imię","Imię", new { @class = "control-label"})
+			@Html.TextBoxFor(model => model.Name, new { @class = "form-control"})
+			@Html.ValidationMessageFor(model => model.Name, "")
+		</div>
+		<br />
+		<div class="form-group">
+			@Html.Label("Nazwisko", "Nazwisko", new { @class = "control-label"})
+			@Html.TextBoxFor(model => model.Surname, new { @class = "form-control"})
+			@Html.ValidationMessageFor(model => model.Surname, "")
+		</div>
+		<br />
+		<div class="form-group">
+			@Html.Label("Email", "Email", new { @class = "control-label"})
+			@Html.TextBoxFor(model => model.Email, new { @class = "form-control"})
+			@Html.ValidationMessageFor(model => model.Email, "")
+		</div>
+		<br />
+		<div class="form-group">
+			@Html.Label("Stanowisko")
+
+
+			<select name="position">
+				@foreach (var position in Model.Position)
+				{
+					<option value="@position">@position</option>
+				}
+
+			</select>
+		</div>
+		<br />
+		<input class="btn btn-secondary" type="submit" value="Dodaj pracownika" />
+	}
+</div>
+
+
+@section Scripts
+	{
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.3/jquery.validate.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/3.2.12/jquery.validate.unobtrusive.js"></script>
+    }
